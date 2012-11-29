@@ -13,7 +13,7 @@ namespace Eastwind.Controllers
 					var docStore = new DocumentStore
 						{
 							Url = "http://localhost:8080",
-							DefaultDatabase = "London"
+							DefaultDatabase = "somedata"
 						};
 
 					docStore.Initialize();
