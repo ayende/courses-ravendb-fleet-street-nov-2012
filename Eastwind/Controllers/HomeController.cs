@@ -40,7 +40,7 @@ namespace Eastwind.Controllers
             return RedirectToAction("Show", new { docId = dude.Id });
         }
 
-        public ActionResult Show(User usr)
+        public ActionResult Show(object usr)
         {
             return Json(usr);
         }
@@ -74,13 +74,5 @@ namespace Eastwind.Controllers
             }
             return Json(new { result.Count, Results = result });
         }
-
-
-        public ActionResult City(string p)
-        {
-            var result = Session.Query<User>().Where(x => x.City == p);
-            return RedirectToAction("Show", result);
-        }
-
     }
 }
