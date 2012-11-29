@@ -2,6 +2,7 @@
 {
 	public class User
 	{
+		public string Id { get; set; }
 		public string Gender { get; set; }
 		public string GivenName { get; set; }
 		public string Surname { get; set; }
