@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Activities.Expressions;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Web.Mvc;
 using Eastwind.Models;
 using System;
+using Raven.Abstractions.Data;
+using Raven.Client;
 
 namespace Eastwind.Controllers
 {
@@ -62,11 +65,10 @@ namespace Eastwind.Controllers
 			return Json(load);
 		}
 
-		public ActionResult Search(string surname)
+		public ActionResult Search2(string surname)
 		{
 			return Json(
-				Session.Query<User>()
-				       .Where(x => x.Surname == surname)
+				Queryable.Where(Session.Query<User>(), x => x.Surname == surname)
 				       .ToList()
 				);
         }
@@ -94,34 +96,57 @@ namespace Eastwind.Controllers
             return Json(usr);
         }
 
-        public ActionResult Query(string p, string f)
+        public ActionResult Query(string usr, string sur, string city, int? zip, string state)
         {
-            var result = new List<User>();
-            switch (f)
-            {
-                case "usr":
-                    result = Session.Query<User>().Where(x => x.GivenName == p).ToList();
-                    break;
-                case "sur":
-                    result = Session.Query<User>().Where(x => x.Surname == p).ToList();
-                    break;
-                case "city":
-                    result = Session.Query<User>().Where(x => x.City == p).ToList();
-                    break;
-                case "zip":
-                    int zzip;
-                    if (Int32.TryParse(p, out zzip))
-                    {
-                        result = Session.Query<User>().Where(x => x.ZipCode == zzip).ToList();
-                    }
-                    break;
+	        IQueryable<User> q = Session.Query<User>();
 
-                case "state":
-                    result = Session.Query<User>().Where(x => x.State== p).ToList();
-                    break;
+	        if (string.IsNullOrEmpty(usr) == false)
+		        q = q.Where(x => x.GivenName == usr);
+			if (string.IsNullOrEmpty(sur) == false)
+				q = q.Where(x => x.Surname == sur);
+			if (string.IsNullOrEmpty(city) == false)
+				q = q.Where(x => x.City == city);
+			if (string.IsNullOrEmpty(state) == false)
+				q = q.Where(x => x.State == state);
+	        if (zip != null)
+		        q = q.Where(x => x.ZipCode == zip.Value);
 
-            }
-            return Json(new { result.Count, Results = result });
+	        var result = q.ToList();
+
+            return Json(new
+	            {
+					Query = q.ToString(),
+					result.Count, 
+					Results = result,
+	            });
         }
+
+		public ActionResult AwesomeQuery(string s)
+		{
+			var q = Session.Query<User>()
+			               .Where(x => x.Surname == s);
+
+			var result = q.ToList();
+
+			if (result.Count == 0)
+			{
+				var suggestions = q.Suggest();
+
+				if (suggestions.Suggestions.Length == 1)
+					return AwesomeQuery(suggestions.Suggestions[0]);
+
+				return Json(new
+					{
+						DidYouMean = suggestions.Suggestions
+					});
+			}
+
+			return Json(new
+			{
+				Query = q.ToString(),
+				result.Count,
+				Results = result,
+			});
+		}
     }
 }
