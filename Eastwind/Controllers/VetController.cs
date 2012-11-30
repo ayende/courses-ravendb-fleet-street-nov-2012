@@ -9,6 +9,32 @@ namespace Eastwind.Controllers
 {
 	public class VetController : RavenController
 	{
+
+		public ActionResult Update(int id)
+		{
+			var customer = Session.Load<Customer>(id);
+			customer.Remarks.Add(null);
+			return Json("");
+		}
+
+		public ActionResult Name(int id)
+		{
+			var customer = Session.Load<Customer>(id);
+			return Json(new
+				{
+					Name = customer.Name,
+					Etag = Session.Advanced.GetEtagFor(customer)
+				});
+		}
+
+		public ActionResult Update2(int id, string name, Guid etag)
+		{
+			var customer = Session.Load<Customer>(id);
+			Session.Store(customer, etag);
+			customer.Name = name;
+			return Json("");
+		}
+
 		public ActionResult Register()
 		{
 			var customer = new Customer
