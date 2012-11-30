@@ -46,4 +46,40 @@ namespace Eastwind.Indexes
 				         };
 		}
 	}
+
+    public class DogsAndCatsByCustomer : AbstractMultiMapIndexCreationTask<DogsAndCatsByCustomer.Result>
+    {
+        public class Result
+        {
+            public string Customer { get; set; }
+            public int CatCount { get; set; }
+            public int DogCount { get; set; }
+        }
+
+        public DogsAndCatsByCustomer()
+        {
+            AddMap<Dog>(dogs =>
+                        from dog in dogs
+                        from c in dog.Customers
+                        select new { Customer = c, CatCount = 0, DogCount = 1 }
+            );
+
+            AddMap<Cat>(cats =>
+                    from cat in cats
+                    from c in cat.Customers
+                    select new { Customer = c, CatCount = 1, DogCount = 0 }
+        );
+
+            Reduce = results =>
+                from result in results
+                group result by result.Customer
+                    into g
+                    select new
+                    {
+                        Customer = g.Key,
+                        CatCount = g.Sum(x => x.CatCount),
+                        DogCount = g.Sum(x => x.DogCount)
+                    };
+        }
+    }
 }

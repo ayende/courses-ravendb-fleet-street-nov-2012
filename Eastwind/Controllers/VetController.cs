@@ -20,6 +20,13 @@ namespace Eastwind.Controllers
 
 			Session.Store(customer);
 
+            var daphne = new Cat
+            {
+                Customers = { customer.Id },
+                Name = "Daphne",
+                Birthday = new DateTime(2010, 1, 1),
+            };
+
 			var oscar = new Dog
 				{
 					Customers = {customer.Id},
@@ -36,6 +43,7 @@ namespace Eastwind.Controllers
 				Breed = "German Shepherd"
 			};
 
+            Session.Store(daphne);
 			Session.Store(oscar);
 			Session.Store(arava);
 
