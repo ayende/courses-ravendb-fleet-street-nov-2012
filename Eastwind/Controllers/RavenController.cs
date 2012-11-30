@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Web.Mvc;
+using Eastwind.Indexes;
+using Eastwind.Models;
 using Raven.Client;
 using Raven.Client.Document;
+using Raven.Client.Indexes;
 
 namespace Eastwind.Controllers
 {
@@ -13,10 +16,19 @@ namespace Eastwind.Controllers
 					var docStore = new DocumentStore
 						{
 							Url = "http://localhost:8080",
-							DefaultDatabase = "London"
+							DefaultDatabase = "Voms"
 						};
-
 					docStore.Initialize();
+
+					//docStore.Conventions.FindTypeTagName = type =>
+					//    {
+					//        if (typeof (Animal).IsAssignableFrom(type))
+					//            return "Animals";
+					//        return DocumentConvention.DefaultTypeTagName(type);
+					//    };
+
+					IndexCreation.CreateIndexes(typeof(Search_ByName).Assembly, docStore);
+
 					return docStore;
 				});
 
